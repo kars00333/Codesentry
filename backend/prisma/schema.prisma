@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Installation {
+  id              String   @id @default(uuid())
+  githubInstallId BigInt   @unique
+  accountLogin    String
+  accountType     String   // "Organization" | "User"
+  createdAt       DateTime @default(now())
+  repos           Repo[]
+}
+
+model Repo {
+  id             String       @id @default(uuid())
+  installation   Installation @relation(fields: [installationId], references: [id])
+  installationId String
+  githubRepoId   BigInt       @unique
+  fullName       String       // "owner/repo"
+  defaultBranch  String       @default("main")
+  configYaml     String?      // cached .codesentry.yml content
+  active         Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  reviews        Review[]
+}
+
+model Review {
+  id          String       @id @default(uuid())
+  repo        Repo         @relation(fields: [repoId], references: [id])
+  repoId      String
+  prNumber    Int
+  prTitle     String
+  headSha     String
+  status      ReviewStatus @default(PENDING)
+  startedAt   DateTime     @default(now())
+  completedAt DateTime?
+  tokensUsed  Int?
+  costUsd     Decimal?     @db.Decimal(10, 4)
+  findings    Finding[]
+}
+
+enum ReviewStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+model Finding {
+  id              String          @id @default(uuid())
+  review          Review          @relation(fields: [reviewId], references: [id])
+  reviewId        String
+  filePath        String
+  lineNumber      Int
+  category        FindingCategory
+  severity        Severity
+  explanation     String          @db.Text
+  suggestion      String?         @db.Text
+  githubCommentId BigInt?
+  resolved        Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+}
+
+enum FindingCategory {
+  BUG
+  STYLE
+  SECURITY
+  PERFORMANCE
+  REFACTOR
+  TEST_COVERAGE
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
