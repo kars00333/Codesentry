@@ -1,5 +1,5 @@
-<<<<<<< HEAD
-# 🛡️ Codesentry — AI-Powered GitHub PR Code Review
+
+#  Codesentry — AI-Powered GitHub PR Code Review
 =======
 #  Codesentry — AI-Powered GitHub PR Code Review
 >>>>>>> e1c4342768c0ed3a45aa4885c76edeff37b462fd
